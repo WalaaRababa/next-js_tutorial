@@ -1,16 +1,34 @@
-import React from 'react'
-async function getData(id) {
-    const result = await fetch(`http://localhost:4000/tickets/${id}`)
-    return result.json()
+import { notFound } from "next/navigation"
+export async function generateStaticParams() {
+  const res = await fetch('http://localhost:4000/tickets')
+
+  const tickets = await res.json()
+ 
+  return tickets.map((ticket) => ({
+params:
+{
+  id:ticket.id.toString()
 }
-export default  async function TicketDetail({ params })
- {
-    const ticket = await getData(params.id)
-    return (
-        <main>
+  }))
+}
+
+async function getTicket(id) {
+  await new Promise (resolve=>setTimeout(resolve,3000))
+  const res = await fetch(`http://localhost:4000/tickets/${id}`)
+  return res.json()
+}
+
+
+export default async function TicketDetails({ params }) {
+  // const id = params.id
+  try {
+    console.log(params.id);
+    const ticket = await getTicket(params.id)
+
+  return (
+    <main>
       <nav>
         <h2>Ticket Details</h2>
-        
       </nav>
       <div className="card">
         <h3>{ticket.title}</h3>
@@ -21,6 +39,11 @@ export default  async function TicketDetail({ params })
         </div>
       </div>
     </main>
-    )
+  )
+  } catch (error) {
+    console.error(error);
+    notFound(); 
+    
+  }
+  
 }
-
